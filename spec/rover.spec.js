@@ -8,6 +8,14 @@ const Command = require('../command.js');
 
 describe("Rover class", function() {
 
-  // 7 tests here!
+test("constructor sets position and default values for mode and generatorWatts", function() {
+    expect(new Rover(5).position).toBe(5);
+    expect(new Rover(5).mode).toBe('NORMAL');
+    expect(new Rover(5).generatorWatts).toBe(110);
+});
+
+test("response returned by receiveMessage contains the name of the message", function() {
+  expect(new ReceiveMessage(message(test))).toBe();
+});
 
 });
