@@ -8,14 +8,82 @@ const Command = require('../command.js');
 
 describe("Rover class", function() {
 
+//test 7
 test("constructor sets position and default values for mode and generatorWatts", function() {
-    expect(new Rover(5).position).toBe(5);
-    expect(new Rover(5).mode).toBe('NORMAL');
-    expect(new Rover(5).generatorWatts).toBe(110);
+  let rover = new Rover(100);
+    expect(rover.position).toBe(100);
+    expect(rover.mode).toBe('NORMAL');
+    expect(rover.generatorWatts).toBe(110);
 });
 
+//test 8
 test("response returned by receiveMessage contains the name of the message", function() {
-  expect(new ReceiveMessage(message(test))).toBe();
+  let rover = new Rover(100);
+  let commands = [
+         new Command('MOVE', 4321),
+         new Command('STATUS_CHECK'),
+         new Command('MODE_CHANGE', 'LOW_POWER'),
+         new Command('MOVE', 3579),
+         new Command('STATUS_CHECK')
+      ];
+  let message = new Message('Message Test', commands);
+  let response = rover.receiveMessage(message);
+    expect(response.message).toContain(message.name);
+});
+
+//test 9
+test("response returned by receiveMessage includes two results if two commands are sent in the message", function() {
+  let rover = new Rover(100);
+  let commands = [
+         new Command('MOVE', 4321),
+         new Command('STATUS_CHECK'),
+      ];
+  let message = new Message('Message Test', commands);
+  let response = rover.receiveMessage(message);
+    expect(response.results.length).toBe(2);
+});
+
+//test 10
+test("responds correctly to the status check command", function() {
+  let rover = new Rover(100);
+  let commands = [new Command('STATUS_CHECK')];
+  let message = new Message('Message Test', commands);
+  let response = rover.receiveMessage(message);
+    expect(response.results[0].completed).toBe(true);
+    expect(response.results[0].roverStatus.mode).toBe('NORMAL');
+    expect(response.results[0].roverStatus.generatorWatts).toBe(110);
+    expect(response.results[0].roverStatus.position).toBe(100);
+});
+
+//test 11
+test("responds correctly to the mode change command", function() {
+  let rover = new Rover(100);
+  let commands = [new Command('MODE_CHANGE', 'LOW_POWER')];
+  let message = new Message('Message Test', commands);
+  let response = rover.receiveMessage(message);
+  expect(response.results[0].completed).toBe(true);
+  expect(rover.mode).toBe('LOW_POWER');
+});
+
+//test 12
+test("responds with a false completed value when attempting to move in LOW_POWER mode", function() {
+  let rover = new Rover(100);
+  let commands = [
+         new Command('MODE_CHANGE', 'LOW_POWER'),
+         new Command('MOVE', 3579),
+      ];
+  let message = new Message('Message Test', commands);
+  let response = rover.receiveMessage(message);
+    expect(response.results[1].completed).toBe(false);
+});
+
+//test 13
+test("responds with the position for the move command", function() {
+  let rover = new Rover(100);
+  let commands = [new Command('MOVE', 4321)];
+  let message = new Message('Message Test', commands);
+  let response = rover.receiveMessage(message);
+    expect(rover.position).toBe(4321);
 });
 
 });
